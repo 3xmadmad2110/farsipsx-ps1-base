@@ -164,7 +164,7 @@ struct Settings
   u32 audio_buffer_size = 2048;
   bool audio_resampling = false;
   bool audio_output_muted = false;
-  bool audio_mute_on_fast_forward = false;
+  bool audio_mute_on_fast_forward = true;
   bool audio_sync_enabled = true;
   bool audio_dump_on_boot = true;
 

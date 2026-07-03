@@ -66,7 +66,7 @@
     <ListPreference
         app:key="Main/Language"
         app:title="@string/settings_language"
-        app:defaultValue="none"
+        app:defaultValue="zh-CN"
         app:entries="@array/settings_language_entries"
         app:entryValues="@array/settings_language_values"
         app:useSimpleSummaryProvider="true"

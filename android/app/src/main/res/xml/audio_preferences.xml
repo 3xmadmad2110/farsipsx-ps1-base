@@ -44,7 +44,7 @@
     <SwitchPreferenceCompat
         app:key="Audio/MuteOnFastForward"
         app:title="@string/settings_mute_on_fast_forward"
-        app:defaultValue="false"
+        app:defaultValue="true"
         app:summary="@string/settings_summary_mute_on_fast_forward"
         app:iconSpaceReserved="false" />
     <SwitchPreferenceCompat

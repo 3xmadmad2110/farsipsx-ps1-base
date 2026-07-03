@@ -54,7 +54,7 @@ public class AndroidProgressCallback {
         Object lock = new Object();
         mContext.runOnUiThread(() -> {
             new AlertDialog.Builder(mContext)
-                    .setTitle("Error")
+                    .setTitle(mContext.getString(R.string.dialog_error))
                     .setMessage(message)
                     .setPositiveButton(mContext.getString(R.string.android_progress_callback_ok), (dialog, button) -> {
                         dialog.dismiss();

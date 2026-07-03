@@ -367,4 +367,7 @@
     <string name="menu_edit_game_directories_force_saf">强制 Scoped Storage</string>
     <string name="settings_expand_to_cutout">扩展到刘海区域</string>
     <string name="settings_summary_expand_to_cutout">将显示区域扩展到包含刘海（或挖孔）区域。</string>
+    <string name="dialog_add">添加</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_error">错误</string>
 </resources>

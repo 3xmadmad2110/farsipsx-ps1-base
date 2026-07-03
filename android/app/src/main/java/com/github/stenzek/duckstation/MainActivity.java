@@ -74,7 +74,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setLanguage() {
-        String language = PreferenceManager.getDefaultSharedPreferences(this).getString("Main/Language", "none");
+        // Default to Simplified Chinese on first launch (before the preference
+        // screen has persisted a value). Users can still switch back to "Use
+        // Device Setting" or any other language in Settings -> General.
+        String language = PreferenceManager.getDefaultSharedPreferences(this).getString("Main/Language", "zh-CN");
         if (language == null || language.equals("none")) {
             return;
         }

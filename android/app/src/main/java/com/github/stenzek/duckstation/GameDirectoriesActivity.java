@@ -300,14 +300,14 @@ public class GameDirectoriesActivity extends AppCompatActivity {
                 .setTitle(R.string.edit_game_directories_add_path)
                 .setMessage(R.string.edit_game_directories_add_path_summary)
                 .setView(text)
-                .setPositiveButton("Add", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.dialog_add), (dialog, which) -> {
                     final String path = text.getText().toString();
                     if (!path.isEmpty()) {
                         addSearchDirectory(GameDirectoriesActivity.this, path, true);
                         mDirectoryListAdapter.reload();
                     }
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
