@@ -1030,7 +1030,13 @@ public class EmulationActivity extends AppCompatActivity implements SurfaceHolde
         try {
             PixelCopy.request(mContentView, bitmap, copyResult -> {
                 if (copyResult == PixelCopy.SUCCESS) {
-                    saveCoverBitmap(bitmap);
+                    // Crop out black borders (letterboxing) so only the actual
+                    // game image is kept, then save as the cover image.
+                    final Bitmap cropped = cropToContent(bitmap);
+                    saveCoverBitmap(cropped);
+                    if (cropped != bitmap) {
+                        bitmap.recycle();
+                    }
                 } else {
                     runOnUiThread(() -> {
                         Toast.makeText(this, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show();
@@ -1043,6 +1049,102 @@ public class EmulationActivity extends AppCompatActivity implements SurfaceHolde
             Toast.makeText(this, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show();
             bitmap.recycle();
         }
+    }
+
+    /**
+     * Detects the non-black content region of a bitmap and returns a cropped
+     * copy containing only the game image. If no black borders are found, the
+     * original bitmap is returned unchanged.
+     *
+     * This eliminates letterboxing (black bars above/below or left/right of
+     * the game image) so the cover fills the grid cell without ugly borders.
+     */
+    private static Bitmap cropToContent(Bitmap bitmap) {
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+        if (width == 0 || height == 0)
+            return bitmap;
+
+        // Sample pixels to find the bounding box of non-black content.
+        // We scan row-by-row and column-by-column, testing a sparse set of
+        // pixels for speed. A pixel is "black" if all channels are very dark.
+        final int threshold = 24; // pixels darker than this are considered black
+        final int[] pixels = new int[width];
+
+        int top = 0;
+        for (int y = 0; y < height; y++) {
+            bitmap.getPixels(pixels, 0, width, 0, y, width, 1);
+            if (rowHasContent(pixels, threshold)) {
+                top = y;
+                break;
+            }
+        }
+
+        int bottom = height - 1;
+        for (int y = height - 1; y >= 0; y--) {
+            bitmap.getPixels(pixels, 0, width, 0, y, width, 1);
+            if (rowHasContent(pixels, threshold)) {
+                bottom = y;
+                break;
+            }
+        }
+
+        // For left/right, scan columns (reuse pixels array if width <= height,
+        // otherwise allocate a column buffer)
+        final int[] colPixels = new int[height];
+        int left = 0;
+        for (int x = 0; x < width; x++) {
+            bitmap.getPixels(colPixels, 0, 1, x, 0, 1, height);
+            if (colHasContent(colPixels, threshold)) {
+                left = x;
+                break;
+            }
+        }
+
+        int right = width - 1;
+        for (int x = width - 1; x >= 0; x--) {
+            bitmap.getPixels(colPixels, 0, 1, x, 0, 1, height);
+            if (colHasContent(colPixels, threshold)) {
+                right = x;
+                break;
+            }
+        }
+
+        // If the content region is essentially the full image, no cropping needed
+        if (top <= 2 && bottom >= height - 3 && left <= 2 && right >= width - 3) {
+            return bitmap;
+        }
+
+        // Guard against degenerate cases
+        if (bottom <= top || right <= left) {
+            return bitmap;
+        }
+
+        return Bitmap.createBitmap(bitmap, left, top, right - left + 1, bottom - top + 1);
+    }
+
+    private static boolean rowHasContent(int[] pixels, int threshold) {
+        for (int pixel : pixels) {
+            int r = (pixel >> 16) & 0xFF;
+            int g = (pixel >> 8) & 0xFF;
+            int b = pixel & 0xFF;
+            if (r > threshold || g > threshold || b > threshold) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean colHasContent(int[] pixels, int threshold) {
+        for (int pixel : pixels) {
+            int r = (pixel >> 16) & 0xFF;
+            int g = (pixel >> 8) & 0xFF;
+            int b = pixel & 0xFF;
+            if (r > threshold || g > threshold || b > threshold) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void saveCoverBitmap(Bitmap bitmap) {
