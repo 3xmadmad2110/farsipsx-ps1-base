@@ -24,18 +24,15 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17 (for Android SDK command-line tools)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
 
       - name: Set up Android SDK components
-        env:
-          # cmdline-tools 16.0 gates on JDK 17; we use JDK 11 for AGP 4.2.1,
-          # so bypass that check. We use the preinstalled cmdline-tools/12.0
-          # ('latest'), which is compatible with JDK 11.
-          SKIP_JDK_VERSION_CHECK: 'true'
+        # The runner's preinstalled sdkmanager is Java 17 bytecode, so it must
+        # run under JDK 17. AGP 4.2.1 needs JDK 11, which is set up afterwards.
         run: |
           set -e
           export ANDROID_HOME=/usr/local/lib/android/sdk
@@ -43,7 +40,6 @@ jobs:
           SDKMGR="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           echo "Using sdkmanager: $SDKMGR"
           "$SDKMGR" --version
-          # Accept licenses (ignore exit code; install pipes 'yes' anyway)
           yes | "$SDKMGR" --licenses > /dev/null 2>&1 || true
           "$SDKMGR" --install \
             "platforms;android-29" \
@@ -55,7 +51,12 @@ jobs:
           ls "$ANDROID_HOME/ndk/" 2>/dev/null
           ls "$ANDROID_HOME/cmake/" 2>/dev/null
           ls "$ANDROID_HOME/platforms/" 2>/dev/null
-          java -version
+
+      - name: Set up JDK 11 (for Gradle / AGP 4.2.1)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
