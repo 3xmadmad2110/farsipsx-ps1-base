@@ -164,6 +164,7 @@ struct Settings
   u32 audio_buffer_size = 2048;
   bool audio_resampling = false;
   bool audio_output_muted = false;
+  bool audio_mute_on_fast_forward = false;
   bool audio_sync_enabled = true;
   bool audio_dump_on_boot = true;
 
@@ -258,7 +259,11 @@ struct Settings
 
   ALWAYS_INLINE s32 GetAudioOutputVolume(bool fast_forwarding) const
   {
-    return audio_output_muted ? 0 : (fast_forwarding ? audio_fast_forward_volume : audio_output_volume);
+    if (audio_output_muted)
+      return 0;
+    if (fast_forwarding)
+      return audio_mute_on_fast_forward ? 0 : audio_fast_forward_volume;
+    return audio_output_volume;
   }
 
   float GetDisplayAspectRatioValue() const;

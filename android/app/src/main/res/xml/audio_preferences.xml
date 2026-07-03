@@ -42,6 +42,12 @@
         app:summary="@string/settings_summary_mute_all_sound"
         app:iconSpaceReserved="false" />
     <SwitchPreferenceCompat
+        app:key="Audio/MuteOnFastForward"
+        app:title="@string/settings_mute_on_fast_forward"
+        app:defaultValue="false"
+        app:summary="@string/settings_summary_mute_on_fast_forward"
+        app:iconSpaceReserved="false" />
+    <SwitchPreferenceCompat
         app:key="CDROM/MuteCDAudio"
         app:title="@string/settings_mute_cd_audio"
         app:defaultValue="false"

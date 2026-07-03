@@ -50,6 +50,8 @@
     <string name="settings_summary_fast_forward_volume">Controls the volume of the emulator\'s sound output when fast forwarding.</string>
     <string name="settings_mute_all_sound">Mute All Sound</string>
     <string name="settings_summary_mute_all_sound">Prevents the emulator from emitting any sound.</string>
+    <string name="settings_mute_on_fast_forward">Mute Sound When Fast Forwarding</string>
+    <string name="settings_summary_mute_on_fast_forward">Mutes audio while fast forwarding or using turbo. Useful since PS1 audio speeds up (and changes pitch) with the game, which can be unpleasant. The music will be silent instead of distorted.</string>
     <string name="settings_mute_cd_audio">Mute CD Audio</string>
     <string name="settings_summary_mute_cd_audio">Forcibly mutes both CD-DA and XA audio from the CD-ROM. Can be used to disable background music in some games.</string>
     <string name="settings_audio_backend">Audio Backend</string>

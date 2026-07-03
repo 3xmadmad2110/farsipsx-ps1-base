@@ -854,7 +854,13 @@ void CommonHostInterface::UpdateSpeedLimiterState()
 
     m_audio_stream->SetInputSampleRate(input_sample_rate);
     m_audio_stream->SetWaitForBufferFill(!m_display_all_frames);
-    m_audio_stream->SetOutputVolume(GetAudioOutputVolume());
+    // Apply fast-forward volume (or mute) when running faster than 100%.
+    // This makes the Audio/FastForwardVolume and Audio/MuteOnFastForward
+    // settings actually take effect on Android (previously ignored).
+    // Covers both fixed-rate (e.g. 2x) and unlimited (0) fast forward/turbo.
+    const bool fast_forwarding =
+      (m_fast_forward_enabled || m_turbo_enabled) && (target_speed == 0.0f || target_speed > 1.05f);
+    m_audio_stream->SetOutputVolume(static_cast<u32>(g_settings.GetAudioOutputVolume(fast_forwarding)));
     m_audio_stream->SetSync(audio_sync_enabled);
     if (audio_sync_enabled)
       m_audio_stream->EmptyBuffers();
@@ -2961,7 +2967,11 @@ void CommonHostInterface::CheckForSettingsChanges(const Settings& old_settings)
         g_settings.display_max_fps != old_settings.display_max_fps ||
         g_settings.display_all_frames != old_settings.display_all_frames ||
         g_settings.audio_resampling != old_settings.audio_resampling ||
-        g_settings.sync_to_host_refresh_rate != old_settings.sync_to_host_refresh_rate)
+        g_settings.sync_to_host_refresh_rate != old_settings.sync_to_host_refresh_rate ||
+        g_settings.audio_fast_forward_volume != old_settings.audio_fast_forward_volume ||
+        g_settings.audio_mute_on_fast_forward != old_settings.audio_mute_on_fast_forward ||
+        g_settings.audio_output_volume != old_settings.audio_output_volume ||
+        g_settings.audio_output_muted != old_settings.audio_output_muted)
     {
       UpdateSpeedLimiterState();
     }
