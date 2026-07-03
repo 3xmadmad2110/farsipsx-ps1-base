@@ -30,24 +30,35 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platforms;android-29
-            build-tools;30.0.2
-            ndk;21.4.7075529
-            cmake;3.10.2.4988404
+      - name: Set up Android SDK components
+        env:
+          # cmdline-tools 16.0 gates on JDK 17; we use JDK 11 for AGP 4.2.1,
+          # so bypass that check. We use the preinstalled cmdline-tools/12.0
+          # ('latest'), which is compatible with JDK 11.
+          SKIP_JDK_VERSION_CHECK: 'true'
+        run: |
+          set -e
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          SDKMGR="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          echo "Using sdkmanager: $SDKMGR"
+          "$SDKMGR" --version
+          # Accept licenses (ignore exit code; install pipes 'yes' anyway)
+          yes | "$SDKMGR" --licenses > /dev/null 2>&1 || true
+          "$SDKMGR" --install \
+            "platforms;android-29" \
+            "build-tools;30.0.2" \
+            "ndk;21.4.7075529" \
+            "cmake;3.10.2.4988404"
+          echo "=== installed components ==="
+          ls "$ANDROID_HOME/build-tools/" 2>/dev/null
+          ls "$ANDROID_HOME/ndk/" 2>/dev/null
+          ls "$ANDROID_HOME/cmake/" 2>/dev/null
+          ls "$ANDROID_HOME/platforms/" 2>/dev/null
+          java -version
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
-
-      - name: Show tool versions
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls "$ANDROID_SDK_ROOT/build-tools/" || true
-          ls "$ANDROID_SDK_ROOT/ndk/" || true
-          java -version
 
       - name: Build release APKs (per-ABI, unsigned)
         working-directory: android
