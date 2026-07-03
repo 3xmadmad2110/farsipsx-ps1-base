@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -14,6 +16,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Display;
+import android.view.PixelCopy;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +29,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -974,6 +982,12 @@ public class EmulationActivity extends AppCompatActivity implements SurfaceHolde
                 menuDialogFragment.close(true);
                 return true;
             });
+
+            createPreference(R.string.emulation_menu_screenshot_cover, R.drawable.ic_baseline_photo_camera_24, true, preference -> {
+                menuDialogFragment.close(false);
+                emulationActivity.captureScreenshotAsCover();
+                return true;
+            });
         }
 
         private void createPreference(int titleId, int icon, boolean enabled, Preference.OnPreferenceClickListener action) {
@@ -984,5 +998,81 @@ public class EmulationActivity extends AppCompatActivity implements SurfaceHolde
             preference.setEnabled(enabled);
             getPreferenceScreen().addPreference(preference);
         }
+    }
+
+    /**
+     * Captures the current emulation frame and saves it as the game's cover image.
+     * Uses PixelCopy (Android 7.0+) to grab pixels from the SurfaceView.
+     * The PNG is saved to <user_dir>/covers/<game_title>.png, which is the same
+     * location used by the "Choose Cover Image" feature in the game list, so the
+     * cover is picked up automatically on the next game list refresh.
+     */
+    public void captureScreenshotAsCover() {
+        if (mGameTitle == null || mGameTitle.isEmpty()) {
+            Toast.makeText(this, R.string.toast_screenshot_no_game, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            Toast.makeText(this, R.string.toast_screenshot_unsupported, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (mContentView == null || mContentView.getWidth() == 0 || mContentView.getHeight() == 0) {
+            Toast.makeText(this, R.string.toast_screenshot_no_surface, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final int width = mContentView.getWidth();
+        final int height = mContentView.getHeight();
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        try {
+            PixelCopy.request(mContentView, bitmap, copyResult -> {
+                if (copyResult == PixelCopy.SUCCESS) {
+                    saveCoverBitmap(bitmap);
+                } else {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show();
+                        bitmap.recycle();
+                    });
+                }
+            }, mContentView.getHandler());
+        } catch (Exception e) {
+            Log.e("EmulationActivity", "PixelCopy failed", e);
+            Toast.makeText(this, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show();
+            bitmap.recycle();
+        }
+    }
+
+    private void saveCoverBitmap(Bitmap bitmap) {
+        final String coverFileName = String.format("%s/covers/%s.png",
+                AndroidHostInterface.getUserDirectory(), sanitizeFileName(mGameTitle));
+        try {
+            final File coverFile = new File(coverFileName);
+            final File coverDir = coverFile.getParentFile();
+            if (coverDir != null && !coverDir.exists()) {
+                coverDir.mkdirs();
+            }
+            final OutputStream outputStream = new FileOutputStream(coverFile);
+            final boolean result = bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+            bitmap.recycle();
+            if (!result) {
+                coverFile.delete();
+                throw new Exception("Failed to compress bitmap.");
+            }
+            runOnUiThread(() ->
+                    Toast.makeText(this, R.string.toast_screenshot_saved_as_cover, Toast.LENGTH_LONG).show());
+        } catch (Exception e) {
+            Log.e("EmulationActivity", "Failed to save cover image", e);
+            bitmap.recycle();
+            runOnUiThread(() ->
+                    Toast.makeText(this, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private static String sanitizeFileName(String name) {
+        return name.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 }

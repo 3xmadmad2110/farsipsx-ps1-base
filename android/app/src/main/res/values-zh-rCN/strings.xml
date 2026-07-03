@@ -346,6 +346,12 @@
     <string name="emulation_menu_toggle_analog_mode">切换控制器模拟模式</string>
     <string name="emulation_menu_reset_console">重置主机</string>
     <string name="emulation_menu_exit_game">退出游戏</string>
+    <string name="emulation_menu_screenshot_cover">截图设为封面</string>
+    <string name="toast_screenshot_no_game">没有正在运行的游戏。</string>
+    <string name="toast_screenshot_unsupported">截图功能需要 Android 7.0 或更高版本。</string>
+    <string name="toast_screenshot_no_surface">无法截取画面，请重试。</string>
+    <string name="toast_screenshot_failed">截图保存为封面失败。</string>
+    <string name="toast_screenshot_saved_as_cover">截图已保存为封面图片，将在游戏列表中显示。</string>
     <string name="settings_use_software_renderer_for_readbacks">回读时使用软件渲染器</string>
     <string name="settings_summary_use_software_renderer_for_readbacks">并行运行软件渲染器进行 VRAM 回读。在某些设备上，这可以在硬件渲染器使用图形增强时带来更好的性能。</string>
     <string name="settings_use_software_renderer">使用软件渲染器</string>

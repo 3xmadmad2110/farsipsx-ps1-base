@@ -346,6 +346,12 @@
     <string name="emulation_menu_toggle_analog_mode">Toggle Controller Analog Mode</string>
     <string name="emulation_menu_reset_console">Reset Console</string>
     <string name="emulation_menu_exit_game">Exit Game</string>
+    <string name="emulation_menu_screenshot_cover">Capture Screenshot as Cover</string>
+    <string name="toast_screenshot_no_game">No game is running.</string>
+    <string name="toast_screenshot_unsupported">Capturing screenshots requires Android 7.0 or later.</string>
+    <string name="toast_screenshot_no_surface">Unable to capture the screen. Please try again.</string>
+    <string name="toast_screenshot_failed">Failed to save the screenshot as cover image.</string>
+    <string name="toast_screenshot_saved_as_cover">Screenshot saved as cover image. It will appear in the game list.</string>
     <string name="settings_use_software_renderer_for_readbacks">Use Software Renderer For Readbacks</string>
     <string name="settings_summary_use_software_renderer_for_readbacks">Runs the software renderer in parallel for VRAM readbacks. On some devices, this may result in greater performance when using graphical enhancements with the hardware renderer.</string>
     <string name="settings_use_software_renderer">Use Software Renderer</string>
