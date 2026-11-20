@@ -366,8 +366,7 @@ public class FarsiLauncherActivity extends Activity {
         if(!lock)return;
         String installer=null;
         try{
-            if(Build.VERSION.SDK_INT>=30) installer=getPackageManager().getInstallSourceInfo(getPackageName()).getInstallingPackageName();
-            else installer=getPackageManager().getInstallerPackageName(getPackageName());
+            installer=getPackageManager().getInstallerPackageName(getPackageName());
         }catch(Exception ignored){}
         if(MARKET_PACKAGE.equals(installer))return;
         String msg=null; JSONObject msgs=cfg.optJSONObject("messages");
