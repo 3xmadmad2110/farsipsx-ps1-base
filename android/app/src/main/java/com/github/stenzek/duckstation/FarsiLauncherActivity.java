@@ -117,6 +117,7 @@ public class FarsiLauncherActivity extends Activity {
 
     @Override protected void onCreate(Bundle b){
         super.onCreate(b);
+        ensureStoragePermission();
         root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.parseColor("#08080A"));
@@ -128,6 +129,22 @@ public class FarsiLauncherActivity extends Activity {
         }catch(Exception ignored){}
         buildHome(); buildStore(); show(homeView);
         new Thread(this::loadConfig).start();
+    }
+
+    private static final int REQ_STORAGE=7701;
+    private void ensureStoragePermission(){
+        try{
+            if(checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)!=android.content.pm.PackageManager.PERMISSION_GRANTED
+               || checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                },REQ_STORAGE);
+            }
+        }catch(Exception ignored){}
+    }
+    @Override public void onRequestPermissionsResult(int req,String[] perms,int[] grants){
+        super.onRequestPermissionsResult(req,perms,grants);
     }
 
     private void buildHome(){
