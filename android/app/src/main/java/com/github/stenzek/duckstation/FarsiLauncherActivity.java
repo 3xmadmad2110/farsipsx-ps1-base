@@ -567,21 +567,39 @@ public class FarsiLauncherActivity extends Activity {
 
     /** Install the PS1 BIOS carried in the OBB tail into DuckStation's bios directory. */
     private void installBios(File obb){
+        final int BIOS_SIZE=512*1024;
         try{
-            if(!isFinalObb(obb))return;
-            long size=0;
-            try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
-                long len=raf.length(); raf.seek(len-16);
-                byte[] tail=new byte[16]; raf.readFully(tail);
-                for(int i=7;i>=0;i--)size=(size<<8)|(tail[i]&0xFFL);
+            if(isFinalObb(obb)){
+                long size=0;
+                try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
+                    long len=raf.length(); raf.seek(len-16);
+                    byte[] tail=new byte[16]; raf.readFully(tail);
+                    for(int i=7;i>=0;i--)size=(size<<8)|(tail[i]&0xFFL);
+                }
+                if(size>=BIOS_SIZE){
+                    byte[] bios=new byte[BIOS_SIZE];
+                    try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
+                        raf.seek(obb.length()-16-size);
+                        raf.readFully(bios);
+                    }
+                    installBiosImage(bios);
+                    return;
+                }
             }
-            final int BIOS_SIZE=512*1024;
-            if(size<BIOS_SIZE)return;
-            byte[] bios=new byte[BIOS_SIZE];
-            try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
-                raf.seek(obb.length()-16-size);
-                raf.readFully(bios);
+        }catch(Exception ignored){}
+        // Older OBB releases carried a PS2 BIOS; accept a PS1 BIOS placed next to the app.
+        String[] names={"SCPH-7003.bin","scph7003.bin","SCPH-1001.bin","scph1001.bin","SCPH-1000.bin","scph1000.bin"};
+        File ext=Environment.getExternalStorageDirectory();
+        for(String n:names){
+            File f=new File(ext,n);
+            if(f.isFile()&&f.length()==BIOS_SIZE){
+                try{installBiosImage(readAll(f));return;}catch(Exception ignored){}
             }
+        }
+    }
+
+    private void installBiosImage(byte[] bios){
+        try{
             MessageDigest md=MessageDigest.getInstance("MD5");
             byte[] digest=md.digest(bios);
             StringBuilder sb=new StringBuilder(32);
@@ -589,9 +607,22 @@ public class FarsiLauncherActivity extends Activity {
             File dir=new File(Environment.getExternalStorageDirectory(),"duckstation/bios");
             if(!dir.exists())dir.mkdirs();
             File out=new File(dir,sb.toString()+".bin");
-            if(out.exists()&&out.length()==BIOS_SIZE)return;
+            if(out.exists()&&out.length()==bios.length)return;
             try(FileOutputStream fos=new FileOutputStream(out)){fos.write(bios);}
         }catch(Exception ignored){}
+    }
+
+    private byte[] readAll(File f)throws Exception{
+        byte[] b=new byte[(int)f.length()];
+        try(FileInputStream in=new FileInputStream(f)){
+            int off=0;
+            while(off<b.length){
+                int n=in.read(b,off,b.length-off);
+                if(n<=0)break;
+                off+=n;
+            }
+        }
+        return b;
     }
 
     /** Strip the optional BIOS tail and write a real cue/bin for DuckStation. */
