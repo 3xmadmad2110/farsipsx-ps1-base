@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.TypedValue;
@@ -38,6 +39,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -563,6 +565,35 @@ public class FarsiLauncherActivity extends Activity {
         }).start();
     }
 
+    /** Install the PS1 BIOS carried in the OBB tail into DuckStation's bios directory. */
+    private void installBios(File obb){
+        try{
+            if(!isFinalObb(obb))return;
+            long size=0;
+            try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
+                long len=raf.length(); raf.seek(len-16);
+                byte[] tail=new byte[16]; raf.readFully(tail);
+                for(int i=7;i>=0;i--)size=(size<<8)|(tail[i]&0xFFL);
+            }
+            final int BIOS_SIZE=512*1024;
+            if(size<BIOS_SIZE)return;
+            byte[] bios=new byte[BIOS_SIZE];
+            try(RandomAccessFile raf=new RandomAccessFile(obb,"r")){
+                raf.seek(obb.length()-16-size);
+                raf.readFully(bios);
+            }
+            MessageDigest md=MessageDigest.getInstance("MD5");
+            byte[] digest=md.digest(bios);
+            StringBuilder sb=new StringBuilder(32);
+            for(byte b:digest)sb.append(String.format("%02x",b&0xFF));
+            File dir=new File(Environment.getExternalStorageDirectory(),"duckstation/bios");
+            if(!dir.exists())dir.mkdirs();
+            File out=new File(dir,sb.toString()+".bin");
+            if(out.exists()&&out.length()==BIOS_SIZE)return;
+            try(FileOutputStream fos=new FileOutputStream(out)){fos.write(bios);}
+        }catch(Exception ignored){}
+    }
+
     /** Strip the optional BIOS tail and write a real cue/bin for DuckStation. */
     private File prepareGame(File obb){
         try{
@@ -601,6 +632,7 @@ public class FarsiLauncherActivity extends Activity {
         Game g=mine; if(g==null)return;
         File f=dataFile(g);
         if(!f.exists()){toast("دیتای بازی وجود ندارد");return;}
+        installBios(f);
         File cue=prepareGame(f);
         if(cue==null){toast("فایل دیتای بازی معتبر نیست");return;}
         try{
