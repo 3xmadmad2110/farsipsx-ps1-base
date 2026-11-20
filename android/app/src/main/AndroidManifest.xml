@@ -24,7 +24,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".FarsiLauncherActivity"
+            android:name="com.github.stenzek.duckstation.FarsiLauncherActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:exported="true"
             android:theme="@android:style/Theme.Material.NoActionBar">
@@ -36,54 +36,54 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MemoryCardEditorActivity"
+            android:name="com.github.stenzek.duckstation.MemoryCardEditorActivity"
             android:label="@string/title_activity_memory_card_editor"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name=".GameDirectoriesActivity"
+            android:name="com.github.stenzek.duckstation.GameDirectoriesActivity"
             android:label="@string/title_activity_game_directories"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".EmulationActivity"
+            android:name="com.github.stenzek.duckstation.EmulationActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:exported="true"
             android:immersive="true"
             android:label="@string/title_activity_emulation"
-            android:parentActivityName=".FarsiLauncherActivity"
+            android:parentActivityName="com.github.stenzek.duckstation.FarsiLauncherActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.stenzek.duckstation.FarsiLauncherActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.github.stenzek.duckstation.SettingsActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".FarsiLauncherActivity">
+            android:parentActivityName="com.github.stenzek.duckstation.FarsiLauncherActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.stenzek.duckstation.FarsiLauncherActivity" />
         </activity>
         <activity
-            android:name=".ControllerSettingsActivity"
+            android:name="com.github.stenzek.duckstation.ControllerSettingsActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:label="@string/controller_mapping_activity_title"
-            android:parentActivityName=".FarsiLauncherActivity">
+            android:parentActivityName="com.github.stenzek.duckstation.FarsiLauncherActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.stenzek.duckstation.FarsiLauncherActivity" />
         </activity>
         <activity
-            android:name=".GamePropertiesActivity"
+            android:name="com.github.stenzek.duckstation.GamePropertiesActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:label="@string/activity_game_properties"
-            android:parentActivityName=".FarsiLauncherActivity">
+            android:parentActivityName="com.github.stenzek.duckstation.FarsiLauncherActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.stenzek.duckstation.FarsiLauncherActivity" />
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.github.stenzek.duckstation.MainActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
