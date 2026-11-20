@@ -356,7 +356,8 @@ public class FarsiLauncherActivity extends Activity {
                 try(InputStream in=conn.getInputStream()){b=BitmapFactory.decodeStream(in);}
             }catch(Exception ignored){}
             finally{if(conn!=null)conn.disconnect();}
-            if(b!=null){bitmaps.put(url,b);runOnUiThread(()->cb.onBitmap(b));}
+            final Bitmap fb=b;
+            if(fb!=null){bitmaps.put(url,fb);runOnUiThread(()->cb.onBitmap(fb));}
         }).start();
     }
 
